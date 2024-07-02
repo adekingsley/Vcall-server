@@ -10,7 +10,7 @@ func main() {
 	server.AllRooms.Init()
 
 	http.HandleFunc("/create", server.CreateRoomRequestHandler)
-	http.HandleFunc("/join", server.JoinRoomRequestHandler)
+	http.HandleFunc("/join/", server.JoinRoomRequestHandler)
 
 	log.Println("Starting Server on Post 8000")
 	err := http.ListenAndServe(":8000", nil)

@@ -8,16 +8,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// AllRooms is the global hashmap for the server
 var AllRooms RoomMap
 
-// CreateRoomRequestHandler Create a Room and return roomID
 func CreateRoomRequestHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	roomID, err := AllRooms.CreateRoom()
 
 	if err != nil {
-		// Handle the error here, for example, by logging it or returning an error response.
 		log.Println("Error creating a room:", err)
 		http.Error(w, "Failed to create a room", http.StatusInternalServerError)
 		return
@@ -52,10 +49,8 @@ func broadcaster() {
 		for _, client := range AllRooms.Map[msg.RoomID] {
 			if client.Conn != msg.Client {
 				err := client.Conn.WriteJSON(msg.Message)
-
 				if err != nil {
 					log.Println("Error broadcasting message:", err)
-					// Handle the error as needed, e.g., remove the client from the room.
 					client.Conn.Close()
 				}
 			}
@@ -63,7 +58,6 @@ func broadcaster() {
 	}
 }
 
-// JoinRoomRequestHandler will join the client in a particular room
 func JoinRoomRequestHandler(w http.ResponseWriter, r *http.Request) {
 	roomID, ok := r.URL.Query()["roomID"]
 
@@ -74,13 +68,12 @@ func JoinRoomRequestHandler(w http.ResponseWriter, r *http.Request) {
 
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("Web Socket Upgrade Error:", err)
+		log.Println("WebSocket Upgrade Error:", err)
 		http.Error(w, "WebSocket upgrade failed", http.StatusInternalServerError)
 		return
 	}
 
 	AllRooms.InsertIntoRoom(roomID[0], false, ws)
-
 	go broadcaster()
 
 	for {
@@ -89,7 +82,6 @@ func JoinRoomRequestHandler(w http.ResponseWriter, r *http.Request) {
 		err := ws.ReadJSON(&msg.Message)
 		if err != nil {
 			log.Println("Read Error:", err)
-			// Handle the error as needed, e.g., disconnect the client gracefully.
 			break
 		}
 
